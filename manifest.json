@@ -1,7 +1,8 @@
 {
   "name": "London Trip",
   "short_name": "London",
-  "start_url": ".",
+  "start_url": "/trip-app/",
+  "scope": "/trip-app/",
   "display": "standalone",
   "background_color": "#0d1017",
   "theme_color": "#0d1017",
