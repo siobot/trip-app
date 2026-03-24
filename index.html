@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="London">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0d1017">
+<title>London Trip</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root {
+    --forest-moss: #669900;
+    --yellow-green: #99cc33;
+    --lime-cream: #ccee66;
+    --baltic-blue: #006699;
+    --blue-bell: #3399cc;
+    --dark-raspberry: #990066;
+    --medium-violet-red: #cc3399;
+    --pumpkin-spice: #ff6600;
+    --amber-glow: #ff9900;
+    --bright-amber: #ffcc00;
+    --bg: #0d1017;
+    --surface: #131820;
+    --surface2: #1a2030;
+    --border: #1e2838;
+    --text: #dde6f0;
+    --muted: #9ab0c4;
+    --muted2: #7a90a8;
+    --accent: var(--blue-bell);
+    --accent2: var(--blue-bell);
+    --red: var(--medium-violet-red);
+    --font: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding-top: env(safe-area-inset-top);
+  }
+  nav button {
+    flex: 1; padding: 14px 4px 12px;
+    background: none; border: none; color: var(--muted2);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  /* SCREENS */
+  .screen { display: none; padding-top: calc(env(safe-area-inset-top) + 48px); }
+  .screen.active { display: block; }
+  /* HEADER */
+  .trip-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .trip-header h1 {
+    font-size: 28px; font-weight: 300; letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .trip-header p { font-family: var(--mono); font-size: 11px; color: var(--muted2); margin-top: 4px; letter-spacing: 0.06em; }
+  /* DAY CARDS */
+  .day-card {
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .day-header:active { background: var(--surface); }
+  .day-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .day-today .day-label {
+    color: var(--amber-glow);
+  }
+  .day-today .day-header::after {
+    content: 'TODAY';
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    background: var(--amber-glow); color: #0c0d0c;
+    padding: 2px 8px; border-radius: 4px; font-weight: 600;
+    margin-right: 10px;
+  }
+  .day-title { font-size: 17px; font-weight: normal; margin-top: 2px; color: var(--text); }
+  .day-chevron {
+    color: var(--muted2); font-size: 18px;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .day-card.open .day-chevron { transform: rotate(90deg); }
+  .day-body { display: none; padding: 0 20px 20px; }
+  .day-card.open .day-body { display: block; }
+  /* ITEMS */
+  .item {
+    display: flex; gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .item:last-child { border-bottom: none; }
+  .item-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; margin-top: 2px;
+    background: var(--surface2);
+  }
+  .item-content { flex: 1; min-width: 0; }
+  .item-name { font-size: 15px; color: var(--text); line-height: 1.3; }
+  .item-detail { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .item-note { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; line-height: 1.4; }
+  /* TRANSIT BLOCK */
+  .transit-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 10px 0 2px;
+  }
+  .transit-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  .transit-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 5px 0;
+    border-top: 1px solid var(--border);
+  }
+  .transit-row:first-of-type { border-top: none; }
+  .tube-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 9px; font-weight: bold; font-family: var(--mono);
+    flex-shrink: 0; margin-top: 1px; color: #fff;
+  }
+  .bus-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 4px;
+    font-size: 8px; font-weight: bold; font-family: var(--mono);
+    flex-shrink: 0; margin-top: 1px; color: #fff; background: #e30613;
+  }
+  .transit-text { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
+  .transit-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  /* TUBE LINE COLOURS */
+  .central    { background: #e1251b; }
+  .district   { background: #007934; }
+  .circle     { background: #f8d42d; color: #000 !important; }
+  .hammersmith{ background: #f3a9bb; color: #333 !important; }
+  .jubilee    { background: #a1a5a7; }
+  .bakerloo   { background: #894e24; }
+  .piccadilly { background: #0019a8; }
+  .elizabeth  { background: #6950a1; }
+  /* LINKS */
+  .map-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 7px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em;
+    color: var(--accent2);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+  }
+  .map-link:active { opacity: 0.7; }
+  /* ALERT / REMINDER */
+  .reminder {
+    background: #141a0e;
+    border: 1px solid #2a3818;
+    border-left: 3px solid var(--amber-glow);
+    border-radius: 0;
+    padding: 10px 12px;
+    margin: 8px 0;
+    font-size: 13px; color: #b89a50; line-height: 1.5;
+  }
+  .reminder-head {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--amber-glow); margin-bottom: 4px; font-weight: 600;
+  }
+  .urgent {
+    background: #150d18;
+    border-color: #3a1840;
+    border-left-color: var(--medium-violet-red);
+    color: #b870aa;
+  }
+  .urgent .reminder-head { color: var(--medium-violet-red); }
+  /* CHECKLIST */
+  .check-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:active { opacity: 0.7; }
+  .check-box {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    font-size: 13px;
+  }
+  .check-item.done .check-box { background: var(--blue-bell); border-color: var(--blue-bell); }
+  .check-item.done .check-text { color: var(--muted2); text-decoration: line-through; }
+  .check-text { font-size: 15px; color: var(--text); }
+  .check-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+  /* MAP SCREEN */
+  #map-screen { padding-top: calc(env(safe-area-inset-top) + 48px); }
+  #map { height: calc(100vh - env(safe-area-inset-top) - 48px - 44px); width: 100%; }
+  .map-filter {
+    display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .map-filter::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    flex-shrink: 0; padding: 5px 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--muted);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .filter-btn.active { background: var(--amber-glow); border-color: var(--amber-glow); color: #0c0d0c; }
+  /* LEAFLET CUSTOM */
+  .custom-pin {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .leaflet-popup-content-wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    color: var(--text) !important;
+  }
+  .leaflet-popup-tip { background: var(--surface) !important; }
+  .leaflet-popup-content { margin: 12px 14px !important; }
+  .popup-name { font-size: 14px; font-weight: normal; color: var(--text); margin-bottom: 3px; }
+  .popup-day { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 6px; }
+  .popup-note { font-size: 12px; color: var(--muted); font-style: italic; line-height: 1.4; margin-bottom: 8px; }
+  .popup-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--mono); font-size: 10px; color: var(--accent2);
+    text-decoration: none; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 5px; padding: 4px 8px;
+  }
+  /* INFO SCREEN */
+  .info-section { padding: 20px; border-bottom: 1px solid var(--border); }
+  .info-section h2 {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .info-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .info-val { color: var(--text); text-align: right; max-width: 60%; }
+</style>
+</head>
+<body>
+<nav>
+  <button class="active" onclick="showScreen('days')">Days</button>
+  <button onclick="showScreen('map-screen')">Map</button>
+  <button onclick="showScreen('pack')">Pack</button>
+  <button onclick="showScreen('info')">Info</button>
+</nav>
+<!-- ═══════════════════════════════════════════════ DAYS SCREEN -->
+<div id="days" class="screen active">
+  <div class="trip-header">
+    <h1>London</h1>
+    <p>27 MAR – 1 APR · 2026 · MSK THE WHITELEY</p>
+  </div>
+  <!-- FRIDAY -->
+  <div class="day-card" id="day-fri" data-date="2026-03-27">
+    <div class="day-header" onclick="toggleDay('day-fri')">
+      <div>
+        <div class="day-label">Friday · 27 Mar</div>
+        <div class="day-title">Arrival</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="item">
+        <div class="item-icon">✈️</div>
+        <div class="item-content">
+          <div class="item-name">LIS → LHR · TP 1366</div>
+          <div class="item-detail">DEPARTS 19:50 · ARRIVES 22:40 GMT · TERMINAL 1<br>CONFIRMATION XH7EVN</div>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Airport → Hotel</div>
+        <div class="transit-row">
+          <div class="tube-badge elizabeth">E</div>
+          <div>
+            <div class="transit-text">Elizabeth line from Heathrow (any terminal)</div>
+            <div class="transit-sub">Direction: Reading/Shenfield · to Paddington · ~26 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle or District line from Paddington</div>
+            <div class="transit-sub">Direction: Hammersmith · 1 stop to Bayswater · 3 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk from Bayswater station</div>
+            <div class="transit-sub">~5 min to The Whiteley, Inverness Terrace</div>
+          </div>
+        </div>
+      </div>
+      <div class="item" style="margin-top:8px;">
+        <div class="item-icon">🏨</div>
+        <div class="item-content">
+          <div class="item-name">MSK The Whiteley</div>
+          <div class="item-detail">CHECK-IN · 66-68 INVERNESS TERRACE, W2 3LB</div>
+          <div class="item-note">Late arrival — ring ahead if concerned. Settle in. No plans tonight.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.512792%2C-0.186209&endname=MSK+The+Whiteley" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- SATURDAY -->
+  <div class="day-card" id="day-sat" data-date="2026-03-28">
+    <div class="day-header" onclick="toggleDay('day-sat')">
+      <div>
+        <div class="day-label">Saturday · 28 Mar</div>
+        <div class="day-title">Portobello & Alfie's</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="reminder urgent">
+        <div class="reminder-head">⚠ Time Sensitive</div>
+        Fight for Sight closes 5pm — do this one first when you arrive on Portobello
+      </div>
+      <div class="reminder">
+        <div class="reminder-head">📅 Book Ahead</div>
+        Holy Carrot or La Mia Mamma — reserve before Saturday
+      </div>
+      <div class="item">
+        <div class="item-icon">👯</div>
+        <div class="item-content">
+          <div class="item-name">Meet friend on Portobello Road</div>
+          <div class="item-detail">~12:00–13:00</div>
+          <div class="item-note">Meet near the market end — Notting Hill Gate tube is closest</div>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Hotel → Portobello Road</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle or District line from Bayswater</div>
+            <div class="transit-sub">Direction: Edgware Road · 1 stop to Notting Hill Gate · 3 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk up Portobello Road from Notting Hill Gate</div>
+            <div class="transit-sub">~8 min to the charity shop stretch</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛍️</div>
+        <div class="item-content">
+          <div class="item-name">Fight for Sight</div>
+          <div class="item-detail">235 PORTOBELLO RD · CLOSES 17:00 — DO FIRST</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5159%2C-0.2022&endname=Fight+for+Sight+235+Portobello" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛍️</div>
+        <div class="item-content">
+          <div class="item-name">Royal Trinity Hospice</div>
+          <div class="item-detail">216 PORTOBELLO RD · CLOSES 18:00</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5155%2C-0.2018&endname=Royal+Trinity+Hospice+216+Portobello" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">📚</div>
+        <div class="item-content">
+          <div class="item-name">Oxfam Bookshop</div>
+          <div class="item-detail">170 PORTOBELLO RD · IF TIME ALLOWS</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5142%2C-0.2009&endname=Oxfam+Bookshop+170+Portobello" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🍽️</div>
+        <div class="item-content">
+          <div class="item-name">Lunch — Holy Carrot or La Mia Mamma</div>
+          <div class="item-detail">BOOK AHEAD · NOTTING HILL AREA</div>
+          <div class="item-note">Holy Carrot: plant-based. La Mia Mamma: Italian. Both near Portobello.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5127%2C-0.1999&endname=Holy+Carrot+Notting+Hill" target="_blank">📍 Holy Carrot in Citymapper</a>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Portobello → Alfie's Antique Market</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle line from Notting Hill Gate</div>
+            <div class="transit-sub">Direction: Hammersmith & City · to Edgware Road · ~10 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk from Edgware Road station to Church St</div>
+            <div class="transit-sub">~8 min walk north to Alfie's</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🏺</div>
+        <div class="item-content">
+          <div class="item-name">Alfie's Antique Market</div>
+          <div class="item-detail">13–25 CHURCH ST, MARYLEBONE · CLOSES 18:00</div>
+          <div class="item-note">Allow 1.5–2 hours. Huge multi-floor market.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5241%2C-0.1653&endname=Alfie%27s+Antique+Market" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Alfie's → Hotel (+ Huel stop)</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle/District line from Edgware Road</div>
+            <div class="transit-sub">Direction: Hammersmith · to Bayswater · ~5 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🛑</div>
+          <div>
+            <div class="transit-text">Stop: Boots Queensway on the way</div>
+            <div class="transit-sub">Closes 21:00 · or Sainsbury's Paddington (until midnight)</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">💊</div>
+        <div class="item-content">
+          <div class="item-name">Pick up Huel</div>
+          <div class="item-detail">BOOTS QUEENSWAY · CLOSES 21:00</div>
+          <div class="item-note">Backup: Sainsbury's Paddington, open until midnight</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5103%2C-0.1873&endname=Boots+Queensway" target="_blank">📍 Boots Queensway in Citymapper</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- SUNDAY -->
+  <div class="day-card" id="day-sun" data-date="2026-03-29">
+    <div class="day-header" onclick="toggleDay('day-sun')">
+      <div>
+        <div class="day-label">Sunday · 29 Mar</div>
+        <div class="day-title">Rest Day</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="reminder">
+        <div class="reminder-head">🕐 Clocks Spring Forward</div>
+        Clocks go forward 1 hour tonight (1am → 2am). You lose an hour of sleep but gain evening daylight. All your devices update automatically — just be aware if you set a manual alarm.
+      </div>
+      <div class="item">
+        <div class="item-icon">😴</div>
+        <div class="item-content">
+          <div class="item-name">Rest. No plans.</div>
+          <div class="item-note">Groceries from Sainsbury's or M&S Foodhall for lunch and dinner.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛒</div>
+        <div class="item-content">
+          <div class="item-name">Sainsbury's Paddington / M&S Foodhall</div>
+          <div class="item-detail">BAYSWATER / PADDINGTON AREA</div>
+          <div class="item-note">M&S Foodhall is in Paddington station. Sainsbury's is a few minutes further.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Foodhall+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- MONDAY -->
+  <div class="day-card" id="day-mon" data-date="2026-03-30">
+    <div class="day-header" onclick="toggleDay('day-mon')">
+      <div>
+        <div class="day-label">Monday · 30 Mar</div>
+        <div class="day-title">TK Maxx & London Graphic Centre</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="transit-block">
+        <div class="transit-label">Hotel → TK Maxx Oxford Street</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle/District from Bayswater</div>
+            <div class="transit-sub">Direction: Edgware Road · to Notting Hill Gate</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge central">C</div>
+          <div>
+            <div class="transit-text">Central line from Notting Hill Gate</div>
+            <div class="transit-sub">Direction: Ealing · to Oxford Circus · ~12 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk along Oxford Street</div>
+            <div class="transit-sub">TK Maxx is a short walk from Oxford Circus</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛍️</div>
+        <div class="item-content">
+          <div class="item-name">TK Maxx Oxford Street · Priority #1</div>
+          <div class="item-detail">OXFORD STREET · DEPART HOTEL ~12:00</div>
+          <div class="item-note">Large store with good Gold Label selection. Do this one first.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1444&endname=TK+Maxx+Oxford+Street" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Oxford Street → Covent Garden (lunch + TK Maxx 2)</div>
+        <div class="transit-row">
+          <div class="tube-badge central">C</div>
+          <div>
+            <div class="transit-text">Central line from Oxford Circus</div>
+            <div class="transit-sub">Direction: Ealing · to Tottenham Court Road · 2 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk south to Long Acre / Covent Garden area</div>
+            <div class="transit-sub">~10 min walk · or Northern line 1 stop to Leicester Square</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🍽️</div>
+        <div class="item-content">
+          <div class="item-name">Lunch — Capilungo</div>
+          <div class="item-detail">76 LONG ACRE, WC2E 9PL · CLOSES 19:00 MON</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5144%2C-0.1221&endname=Capilungo+76+Long+Acre" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛍️</div>
+        <div class="item-content">
+          <div class="item-name">TK Maxx Charing Cross Road · Priority #2</div>
+          <div class="item-detail">CHARING CROSS ROAD</div>
+          <div class="item-note">Right next to London Graphic Centre — do both together.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5147%2C-0.1296&endname=TK+Maxx+Charing+Cross+Road" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🎨</div>
+        <div class="item-content">
+          <div class="item-name">London Graphic Centre</div>
+          <div class="item-detail">16–18 SHELTON ST, WC2H 9JL · CLOSES 19:30</div>
+          <div class="item-note">Pens, markers, art supplies. 2 min walk from TK Maxx Charing Cross Rd.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5133%2C-0.1260&endname=London+Graphic+Centre" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Covent Garden → Hotel</div>
+        <div class="transit-row">
+          <div class="tube-badge piccadilly">P</div>
+          <div>
+            <div class="transit-text">Piccadilly line from Covent Garden</div>
+            <div class="transit-sub">Direction: Heathrow · to Hammersmith · ~15 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge district">D</div>
+          <div>
+            <div class="transit-text">District line from Hammersmith</div>
+            <div class="transit-sub">Direction: Upminster · to Bayswater · ~12 min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- TUESDAY -->
+  <div class="day-card" id="day-tue" data-date="2026-03-31">
+    <div class="day-header" onclick="toggleDay('day-tue')">
+      <div>
+        <div class="day-label">Tuesday · 31 Mar</div>
+        <div class="day-title">Waterstones Piccadilly</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="transit-block">
+        <div class="transit-label">Hotel → Waterstones Piccadilly</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle/District line from Bayswater</div>
+            <div class="transit-sub">Direction: Edgware Road · to Notting Hill Gate, change to Central</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge central">C</div>
+          <div>
+            <div class="transit-text">Central line from Notting Hill Gate</div>
+            <div class="transit-sub">Direction: Ealing · to Oxford Circus · ~12 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge bakerloo">B</div>
+          <div>
+            <div class="transit-text">Bakerloo line from Oxford Circus</div>
+            <div class="transit-sub">Direction: Elephant & Castle · 1 stop to Piccadilly Circus · 2 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🚶</div>
+          <div>
+            <div class="transit-text">Walk from Piccadilly Circus</div>
+            <div class="transit-sub">~3 min along Piccadilly to Waterstones</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">📖</div>
+        <div class="item-content">
+          <div class="item-name">Waterstones Piccadilly</div>
+          <div class="item-detail">203-206 PICCADILLY, W1J 9HD · DEPART HOTEL ~12:00</div>
+          <div class="item-note">Largest bookshop in Europe. Café on 5th floor for lunch. Browse 2+ hours — colour theory, alcohol markers, beading, granny squares.</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5095%2C-0.1367&endname=Waterstones+Piccadilly" target="_blank">📍 Open in Citymapper</a>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Return via Paddington (groceries)</div>
+        <div class="transit-row">
+          <div class="tube-badge bakerloo">B</div>
+          <div>
+            <div class="transit-text">Bakerloo line from Piccadilly Circus</div>
+            <div class="transit-sub">Direction: Harrow & Wealdstone · to Paddington · ~10 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">🛑</div>
+          <div>
+            <div class="transit-text">Stop at Sainsbury's or M&S at Paddington</div>
+            <div class="transit-sub">Pick up Tue dinner</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle/District from Paddington to Bayswater</div>
+            <div class="transit-sub">Direction: Hammersmith · 1 stop · 3 min</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">🛒</div>
+        <div class="item-content">
+          <div class="item-name">Groceries — Tue dinner</div>
+          <div class="item-detail">SAINSBURY'S OR M&S · PADDINGTON</div>
+          <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- WEDNESDAY -->
+  <div class="day-card" id="day-wed" data-date="2026-04-01">
+    <div class="day-header" onclick="toggleDay('day-wed')">
+      <div>
+        <div class="day-label">Wednesday · 1 Apr</div>
+        <div class="day-title">Checkout & Fly Home</div>
+      </div>
+      <div class="day-chevron">›</div>
+    </div>
+    <div class="day-body">
+      <div class="reminder">
+        <div class="reminder-head">🕐 Reminder: BST is active</div>
+        Clocks changed Sunday night. UK is now GMT+1 (BST). All times below are local BST.
+      </div>
+      <div class="item">
+        <div class="item-icon">🏨</div>
+        <div class="item-content">
+          <div class="item-name">Check out — MSK The Whiteley</div>
+          <div class="item-detail">BY 11:00 BST</div>
+        </div>
+      </div>
+      <div class="transit-block">
+        <div class="transit-label">Hotel → Heathrow Terminal 2</div>
+        <div class="transit-row">
+          <div class="tube-badge circle">C</div>
+          <div>
+            <div class="transit-text">Circle/District from Bayswater to Paddington</div>
+            <div class="transit-sub">Direction: Hammersmith · 1 stop · 3 min</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div class="tube-badge elizabeth">E</div>
+          <div>
+            <div class="transit-text">Elizabeth line from Paddington to Heathrow T2/T3</div>
+            <div class="transit-sub">Direction: Heathrow · ~26 min · check signage for T2</div>
+          </div>
+        </div>
+        <div class="transit-row">
+          <div style="font-size:16px; width:20px; text-align:center; flex-shrink:0; margin-top:1px;">⏰</div>
+          <div>
+            <div class="transit-text">Aim to leave hotel by 10:30</div>
+            <div class="transit-sub">Flight TP 1359 departs 13:45 BST · allow 2h at airport</div>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-icon">✈️</div>
+        <div class="item-content">
+          <div class="item-name">LHR → LIS · TP 1359</div>
+          <div class="item-detail">DEPARTS 13:45 BST · ARRIVES 16:35 · TERMINAL 2<br>CONFIRMATION XH7EVN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════ MAP SCREEN -->
+<div id="map-screen" class="screen">
+  <div class="map-filter">
+    <button class="filter-btn active" onclick="filterMap('all', this)">All</button>
+    <button class="filter-btn" onclick="filterMap('hotel', this)">Hotel</button>
+    <button class="filter-btn" onclick="filterMap('shop', this)">Shopping</button>
+    <button class="filter-btn" onclick="filterMap('food', this)">Food</button>
+    <button class="filter-btn" onclick="filterMap('art', this)">Art & Books</button>
+    <button class="filter-btn" onclick="filterMap('transit', this)">Transit Hubs</button>
+  </div>
+  <div id="map"></div>
+</div>
+<!-- ═══════════════════════════════════════════════ PACK SCREEN -->
+<div id="pack" class="screen">
+  <div class="trip-header">
+    <h1>Packing</h1>
+    <p>TAP TO CHECK OFF</p>
+  </div>
+  <div style="padding: 0 20px;">
+    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Documents</div>
+    <div class="check-item" data-key="pack-passport" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Passport</div></div></div>
+    <div class="check-item" data-key="pack-flight" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Flight confirmation</div><div class="check-sub">XH7EVN · TP 1366 / TP 1359</div></div></div>
+    <div class="check-item" data-key="pack-hotel" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Hotel confirmation</div><div class="check-sub">MSK The Whiteley</div></div></div>
+    <div class="check-item" data-key="pack-insurance" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Travel insurance</div></div></div>
+    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Money & Cards</div>
+    <div class="check-item" data-key="pack-cards" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Bank card + backup card</div></div></div>
+    <div class="check-item" data-key="pack-cash" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Some GBP cash</div></div></div>
+    <div class="check-item" data-key="pack-oyster" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Oyster card or contactless ready</div><div class="check-sub">Contactless bank card works on all TfL</div></div></div>
+    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Tech</div>
+    <div class="check-item" data-key="pack-phone" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Phone + charger</div></div></div>
+    <div class="check-item" data-key="pack-adapter" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">UK plug adapter</div></div></div>
+    <div class="check-item" data-key="pack-powerbank" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Power bank</div></div></div>
+    <div class="check-item" data-key="pack-earphones" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Earphones</div></div></div>
+    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Clothing</div>
+    <div class="check-item" data-key="pack-rain" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Waterproof jacket / umbrella</div><div class="check-sub">London in March — expect rain</div></div></div>
+    <div class="check-item" data-key="pack-shoes" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Comfortable walking shoes</div></div></div>
+    <div class="check-item" data-key="pack-layers" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Layers</div></div></div>
+    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">To Book / Do Before You Go</div>
+    <div class="check-item" data-key="pack-restaurant" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Book Saturday lunch restaurant</div><div class="check-sub">Holy Carrot or La Mia Mamma</div></div></div>
+    <div class="check-item" data-key="pack-bank" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Notify bank of travel</div></div></div>
+    <div class="check-item" data-key="pack-homescreen" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Download this app to home screen</div></div></div>
+    <div style="height: 40px;"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════ INFO SCREEN -->
+<div id="info" class="screen">
+  <div class="trip-header">
+    <h1>Trip Info</h1>
+  </div>
+  <div class="info-section">
+    <h2>Flights</h2>
+    <div class="info-row"><span class="info-label">Outbound</span><span class="info-val">TP 1366 · LIS→LHR</span></div>
+    <div class="info-row"><span class="info-label">Departs</span><span class="info-val">Fri 27 Mar · 19:50</span></div>
+    <div class="info-row"><span class="info-label">Arrives</span><span class="info-val">22:40 GMT · T1</span></div>
+    <div class="info-row"><span class="info-label">Return</span><span class="info-val">TP 1359 · LHR→LIS</span></div>
+    <div class="info-row"><span class="info-label">Departs</span><span class="info-val">Wed 1 Apr · 13:45 BST</span></div>
+    <div class="info-row"><span class="info-label">Arrives</span><span class="info-val">16:35 · T2</span></div>
+    <div class="info-row"><span class="info-label">Confirmation</span><span class="info-val">XH7EVN</span></div>
+  </div>
+  <div class="info-section">
+    <h2>Hotel</h2>
+    <div class="info-row"><span class="info-label">Name</span><span class="info-val">MSK The Whiteley</span></div>
+    <div class="info-row"><span class="info-label">Address</span><span class="info-val">66-68 Inverness Terrace, W2 3LB</span></div>
+    <div class="info-row"><span class="info-label">Check-in</span><span class="info-val">Fri 27 Mar · from 15:00</span></div>
+    <div class="info-row"><span class="info-label">Check-out</span><span class="info-val">Wed 1 Apr · by 11:00</span></div>
+    <div class="info-row"><span class="info-label">Nearest tube</span><span class="info-val">Bayswater (Circle/District)</span></div>
+    <a class="map-link" style="margin-top: 10px; display: inline-flex;" href="https://citymapper.com/directions?endcoord=51.512792%2C-0.186209&endname=MSK+The+Whiteley" target="_blank">📍 Hotel in Citymapper</a>
+  </div>
+  <div class="info-section">
+    <h2>Time Zone</h2>
+    <div class="info-row"><span class="info-label">Fri 27 – Sat 28</span><span class="info-val">GMT (UTC+0)</span></div>
+    <div class="info-row"><span class="info-label">Sun 29 onwards</span><span class="info-val">BST (UTC+1)</span></div>
+    <div class="info-row"><span class="info-label">Clocks change</span><span class="info-val">Sun 29 Mar · 1am → 2am</span></div>
+  </div>
+  <div class="info-section">
+    <h2>Useful Numbers</h2>
+    <div class="info-row"><span class="info-label">Emergency</span><span class="info-val">999</span></div>
+    <div class="info-row"><span class="info-label">Non-emergency police</span><span class="info-val">101</span></div>
+    <div class="info-row"><span class="info-label">NHS helpline</span><span class="info-val">111</span></div>
+    <div class="info-row"><span class="info-label">TfL status</span><span class="info-val">tfl.gov.uk/status</span></div>
+  </div>
+  <div class="info-section">
+    <h2>Install to Home Screen</h2>
+    <div style="font-size: 14px; color: var(--muted); line-height: 1.7;">
+      In Safari: tap the <strong style="color: var(--text);">Share</strong> button → <strong style="color: var(--text);">Add to Home Screen</strong> → <strong style="color: var(--text);">Add</strong>.<br><br>
+      The app will appear as an icon and open full-screen without the browser bar.
+    </div>
+  </div>
+  <div style="height: 40px;"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ── SERVICE WORKER ───────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+// ── NAV ──────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['days','map-screen','pack','info'].indexOf(id);
+  document.querySelectorAll('nav button')[idx].classList.add('active');
+  if (id === 'map-screen' && !mapInit) initMap();
+}
+// ── DAY ACCORDION ─────────────────────────────────────────────────
+function toggleDay(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+// ── AUTO-OPEN TODAY'S DAY ────────────────────────────────────────
+function highlightToday() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  document.querySelectorAll('.day-card[data-date]').forEach(card => {
+    if (card.dataset.date === dateStr) {
+      card.classList.add('open', 'day-today');
+    }
+  });
+}
+highlightToday();
+// ── CHECKLIST WITH PERSISTENCE ───────────────────────────────────
+function getChecked() {
+  try { return JSON.parse(localStorage.getItem('london-checked') || '{}'); } catch { return {}; }
+}
+function saveChecked(state) {
+  localStorage.setItem('london-checked', JSON.stringify(state));
+}
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  el.querySelector('.check-box').textContent = el.classList.contains('done') ? '✓' : '';
+  const key = el.dataset.key;
+  if (key) {
+    const state = getChecked();
+    state[key] = el.classList.contains('done');
+    saveChecked(state);
+  }
+}
+// Restore checklist state on load
+(function restoreChecklist() {
+  const state = getChecked();
+  document.querySelectorAll('.check-item[data-key]').forEach(el => {
+    if (state[el.dataset.key]) {
+      el.classList.add('done');
+      el.querySelector('.check-box').textContent = '✓';
+    }
+  });
+})();
+// ── MAP ──────────────────────────────────────────────────────────
+let mapInit = false;
+let allMarkers = [];
+const places = [
+  { name: 'MSK The Whiteley', lat: 51.512792, lng: -0.186209, type: 'hotel', day: 'Hotel', icon: '🏨', note: 'Check-in Fri · Check-out Wed 11:00' },
+  { name: 'Fight for Sight', lat: 51.5159, lng: -0.2022, type: 'shop', day: 'Saturday', icon: '🛍️', note: 'Closes 17:00 — do first!' },
+  { name: 'Royal Trinity Hospice', lat: 51.5155, lng: -0.2018, type: 'shop', day: 'Saturday', icon: '🛍️', note: 'Closes 18:00' },
+  { name: 'Oxfam Bookshop', lat: 51.5142, lng: -0.2009, type: 'shop', day: 'Saturday', icon: '📚', note: 'If time allows' },
+  { name: "Alfie's Antique Market", lat: 51.5241, lng: -0.1653, type: 'shop', day: 'Saturday', icon: '🏺', note: 'Closes 18:00 · Allow 1.5–2 hrs' },
+  { name: 'Holy Carrot', lat: 51.5127, lng: -0.1999, type: 'food', day: 'Saturday', icon: '🍽️', note: 'Plant-based · Book ahead' },
+  { name: 'Boots Queensway', lat: 51.5103, lng: -0.1873, type: 'shop', day: 'Saturday', icon: '💊', note: 'Huel pickup · Closes 21:00' },
+  { name: 'Waterstones Piccadilly', lat: 51.5095, lng: -0.1367, type: 'art', day: 'Tuesday', icon: '📖', note: 'Largest bookshop in Europe · Café on 5th floor' },
+  { name: 'TK Maxx Oxford Street', lat: 51.5154, lng: -0.1444, type: 'shop', day: 'Monday', icon: '🛍️', note: 'Priority #1 · Gold Label' },
+  { name: 'Capilungo', lat: 51.5144, lng: -0.1221, type: 'food', day: 'Monday', icon: '🍽️', note: '76 Long Acre · Closes 19:00 Mon' },
+  { name: 'TK Maxx Charing Cross Rd', lat: 51.5147, lng: -0.1296, type: 'shop', day: 'Monday', icon: '🛍️', note: 'Priority #2 · Near London Graphic Centre' },
+  { name: 'London Graphic Centre', lat: 51.5133, lng: -0.1260, type: 'art', day: 'Monday', icon: '🎨', note: 'Closes 19:30 · Pens & markers' },
+  { name: 'Bayswater Station', lat: 51.5121, lng: -0.1879, type: 'transit', day: 'Transit', icon: '🚇', note: 'Circle & District lines' },
+  { name: 'Paddington Station', lat: 51.5154, lng: -0.1755, type: 'transit', day: 'Transit', icon: '🚇', note: 'Elizabeth line + groceries (M&S inside)' },
+  { name: 'Notting Hill Gate Station', lat: 51.5094, lng: -0.1967, type: 'transit', day: 'Transit', icon: '🚇', note: 'Circle, District & Central lines' },
+];
+const typeColors = {
+  hotel: '#ff9900',
+  shop: '#99cc33',
+  food: '#cc3399',
+  art: '#669900',
+  transit: '#3399cc'
+};
+function initMap() {
+  mapInit = true;
+  const map = L.map('map', {
+    center: [51.513, -0.162],
+    zoom: 13,
+    zoomControl: false
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    maxZoom: 19
+  }).addTo(map);
+  places.forEach(p => {
+    const color = typeColors[p.type];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="custom-pin" style="background:${color}20; border-color:${color};">${p.icon}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -18]
+    });
+    const cmUrl = `https://citymapper.com/directions?endcoord=${p.lat}%2C${p.lng}&endname=${encodeURIComponent(p.name)}`;
+    const popup = L.popup({ maxWidth: 220, className: '' }).setContent(
+      `<div class="popup-day">${p.day.toUpperCase()}</div>
+       <div class="popup-name">${p.icon} ${p.name}</div>
+       <div class="popup-note">${p.note}</div>
+       <a class="popup-link" href="${cmUrl}" target="_blank">📍 Open in Citymapper</a>`
+    );
+    const marker = L.marker([p.lat, p.lng], { icon }).bindPopup(popup).addTo(map);
+    marker._type = p.type;
+    allMarkers.push(marker);
+  });
+}
+function filterMap(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  allMarkers.forEach(m => {
+    if (type === 'all' || m._type === type) {
+      m.setOpacity(1);
+    } else {
+      m.setOpacity(0.15);
+    }
+  });
+}
+</script>
+</body>
+</html>
