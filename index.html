@@ -221,6 +221,63 @@
   .check-item.done .check-text { color: var(--muted2); text-decoration: line-through; }
   .check-text { font-size: 25px; color: var(--text); }
   .check-sub { font-family: var(--mono); font-size: 18px; color: var(--muted); margin-top: 2px; }
+  /* PACK EDIT MODE */
+  .pack-edit-btn {
+    font-family: var(--mono); font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: none; border: 1.5px solid var(--accent); color: var(--accent);
+    border-radius: 6px; padding: 5px 14px; cursor: pointer; flex-shrink: 0; margin-top: 4px;
+  }
+  .pack-edit-btn.done-btn { border-color: var(--muted2); color: var(--muted2); }
+  .pack-cat-header {
+    display: flex; align-items: center; gap: 8px; padding: 14px 0 6px;
+  }
+  .pack-cat-label {
+    font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); flex: 1; cursor: pointer;
+  }
+  .pack-cat-label[contenteditable="true"] {
+    outline: none; border-bottom: 1.5px solid var(--accent); padding-bottom: 2px;
+  }
+  .pack-cat-add-btn {
+    font-family: var(--mono); font-size: 14px; background: none;
+    border: 1px solid var(--border); color: var(--muted2); border-radius: 4px;
+    padding: 3px 9px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .pack-cat-del-btn {
+    font-family: var(--mono); font-size: 14px; background: none;
+    border: 1px solid var(--red); color: var(--red); border-radius: 4px;
+    padding: 3px 9px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .check-item.edit-mode { cursor: default; }
+  .check-item.edit-mode:active { opacity: 1; }
+  .drag-handle {
+    width: 36px; height: 44px; display: flex; align-items: center; justify-content: center;
+    color: var(--muted2); font-size: 22px; cursor: grab; flex-shrink: 0;
+    touch-action: none; user-select: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .delete-btn {
+    width: 40px; height: 44px; display: flex; align-items: center; justify-content: center;
+    background: none; border: none; color: var(--red); font-size: 24px;
+    cursor: pointer; flex-shrink: 0; padding: 0;
+  }
+  .check-text[contenteditable="true"] {
+    outline: none; border-bottom: 1.5px solid var(--accent); padding-bottom: 1px;
+  }
+  .drag-clone {
+    position: fixed; left: 0; right: 0; background: var(--surface2);
+    border-top: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent);
+    z-index: 9999; pointer-events: none; opacity: 0.92;
+    padding: 11px 20px; display: flex; align-items: center; gap: 12px;
+    color: var(--text); font-size: 25px;
+  }
+  .pack-add-cat-btn {
+    display: block; width: 100%; margin: 16px 0 8px; padding: 14px;
+    background: none; border: 1.5px dashed var(--border); border-radius: 8px;
+    color: var(--muted2); font-family: var(--mono); font-size: 16px;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; text-align: center;
+  }
+  .pack-add-cat-btn:active { border-color: var(--accent); color: var(--accent); }
   /* MAP SCREEN */
   #map-screen { padding-top: calc(env(safe-area-inset-top) + 48px); }
   #map { height: calc(100vh - env(safe-area-inset-top) - 48px - 44px); width: 100%; }
@@ -766,35 +823,14 @@
 </div>
 <!-- ═══════════════════════════════════════════════ PACK SCREEN -->
 <div id="pack" class="screen">
-  <div class="trip-header">
-    <h1>Packing</h1>
-    <p>TAP TO CHECK OFF</p>
+  <div class="trip-header" style="display:flex; align-items:flex-start; justify-content:space-between;">
+    <div>
+      <h1>Packing</h1>
+      <p id="pack-subtitle" class="muted mono" style="font-size:18px; letter-spacing:0.1em; text-transform:uppercase; margin:0;">TAP TO CHECK OFF</p>
+    </div>
+    <button class="pack-edit-btn" id="pack-edit-btn" onclick="togglePackEdit()">EDIT</button>
   </div>
-  <div style="padding: 0 20px;">
-    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Documents</div>
-    <div class="check-item" data-key="pack-passport" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Passport</div></div></div>
-    <div class="check-item" data-key="pack-flight" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Flight confirmation</div><div class="check-sub">XH7EVN · TP 1366 / TP 1359</div></div></div>
-    <div class="check-item" data-key="pack-hotel" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Hotel confirmation</div><div class="check-sub">MSK The Whiteley</div></div></div>
-    <div class="check-item" data-key="pack-insurance" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Travel insurance</div></div></div>
-    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Money & Cards</div>
-    <div class="check-item" data-key="pack-cards" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Bank card + backup card</div></div></div>
-    <div class="check-item" data-key="pack-cash" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Some GBP cash</div></div></div>
-    <div class="check-item" data-key="pack-oyster" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Oyster card or contactless ready</div><div class="check-sub">Contactless bank card works on all TfL</div></div></div>
-    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Tech</div>
-    <div class="check-item" data-key="pack-phone" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Phone + charger</div></div></div>
-    <div class="check-item" data-key="pack-adapter" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">UK plug adapter</div></div></div>
-    <div class="check-item" data-key="pack-powerbank" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Power bank</div></div></div>
-    <div class="check-item" data-key="pack-earphones" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Earphones</div></div></div>
-    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">Clothing</div>
-    <div class="check-item" data-key="pack-rain" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Waterproof jacket / umbrella</div><div class="check-sub">London in March — expect rain</div></div></div>
-    <div class="check-item" data-key="pack-shoes" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Comfortable walking shoes</div></div></div>
-    <div class="check-item" data-key="pack-layers" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Layers</div></div></div>
-    <div style="padding: 14px 0 6px; font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">To Book / Do Before You Go</div>
-    <div class="check-item" data-key="pack-restaurant" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Book Saturday lunch restaurant</div><div class="check-sub">Holy Carrot or La Mia Mamma</div></div></div>
-    <div class="check-item" data-key="pack-bank" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Notify bank of travel</div></div></div>
-    <div class="check-item" data-key="pack-homescreen" onclick="toggleCheck(this)"><div class="check-box"></div><div><div class="check-text">Download this app to home screen</div></div></div>
-    <div style="height: 40px;"></div>
-  </div>
+  <div id="pack-list" style="padding: 0 20px;"></div>
 </div>
 <!-- ═══════════════════════════════════════════════ INFO SCREEN -->
 <div id="info" class="screen">
@@ -856,6 +892,7 @@ function showScreen(id) {
   const idx = ['days','map-screen','pack','info'].indexOf(id);
   document.querySelectorAll('nav button')[idx].classList.add('active');
   if (id === 'map-screen' && !mapInit) initMap();
+  if (id === 'pack') renderPackList();
 }
 // ── DAY ACCORDION ─────────────────────────────────────────────────
 function toggleDay(id) {
@@ -877,6 +914,254 @@ function highlightToday() {
   });
 }
 highlightToday();
+// ── PACK LIST DATA ────────────────────────────────────────────────
+let packData = [];
+let packEditMode = false;
+
+function seedPackData() {
+  return [
+    { id: 'cat-documents', label: 'Documents', items: [
+      { id: 'pack-passport', text: 'Passport', sub: '' },
+      { id: 'pack-flight', text: 'Flight confirmation', sub: 'XH7EVN · TP 1366 / TP 1359' },
+      { id: 'pack-hotel', text: 'Hotel confirmation', sub: 'MSK The Whiteley' },
+      { id: 'pack-insurance', text: 'Travel insurance', sub: '' }
+    ]},
+    { id: 'cat-money', label: 'Money & Cards', items: [
+      { id: 'pack-cards', text: 'Bank card + backup card', sub: '' },
+      { id: 'pack-cash', text: 'Some GBP cash', sub: '' },
+      { id: 'pack-oyster', text: 'Oyster card or contactless ready', sub: 'Contactless bank card works on all TfL' }
+    ]},
+    { id: 'cat-tech', label: 'Tech', items: [
+      { id: 'pack-phone', text: 'Phone + charger', sub: '' },
+      { id: 'pack-adapter', text: 'UK plug adapter', sub: '' },
+      { id: 'pack-powerbank', text: 'Power bank', sub: '' },
+      { id: 'pack-earphones', text: 'Earphones', sub: '' }
+    ]},
+    { id: 'cat-clothing', label: 'Clothing', items: [
+      { id: 'pack-rain', text: 'Waterproof jacket / umbrella', sub: 'London in March — expect rain' },
+      { id: 'pack-shoes', text: 'Comfortable walking shoes', sub: '' },
+      { id: 'pack-layers', text: 'Layers', sub: '' }
+    ]},
+    { id: 'cat-todo', label: 'To Book / Do Before You Go', items: [
+      { id: 'pack-restaurant', text: 'Book Saturday lunch restaurant', sub: 'Holy Carrot or La Mia Mamma' },
+      { id: 'pack-bank', text: 'Notify bank of travel', sub: '' },
+      { id: 'pack-homescreen', text: 'Download this app to home screen', sub: '' }
+    ]}
+  ];
+}
+
+function getPackData() {
+  try { return JSON.parse(localStorage.getItem('london-pack-data') || 'null') || seedPackData(); }
+  catch { return seedPackData(); }
+}
+
+function savePackData() {
+  localStorage.setItem('london-pack-data', JSON.stringify(packData));
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderPackList() {
+  const container = document.getElementById('pack-list');
+  if (!container) return;
+  let html = '';
+  for (const cat of packData) {
+    if (packEditMode) {
+      html += `<div class="pack-cat-header">
+        <div class="pack-cat-label" onclick="startCatRename('${cat.id}')">${escHtml(cat.label)}</div>
+        <button class="pack-cat-add-btn" onclick="addItem('${cat.id}')">+ Item</button>
+        <button class="pack-cat-del-btn" onclick="deleteCategory('${cat.id}')">× Cat</button>
+      </div>`;
+    } else {
+      html += `<div style="padding:14px 0 6px;font-family:var(--mono);font-size:16px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">${escHtml(cat.label)}</div>`;
+    }
+    for (const item of cat.items) {
+      if (packEditMode) {
+        html += `<div class="check-item edit-mode" data-key="${escHtml(item.id)}" data-cat="${escHtml(cat.id)}">
+          <div class="drag-handle" ontouchstart="onDragHandleTouchStart(event,'${cat.id}','${item.id}')">≡</div>
+          <div style="flex:1;min-width:0;">
+            <div class="check-text" onclick="startItemRename('${cat.id}','${item.id}')">${escHtml(item.text)}</div>
+            ${item.sub ? `<div class="check-sub">${escHtml(item.sub)}</div>` : ''}
+          </div>
+          <button class="delete-btn" onclick="deleteItem('${cat.id}','${item.id}')">×</button>
+        </div>`;
+      } else {
+        html += `<div class="check-item" data-key="${escHtml(item.id)}" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div>
+            <div class="check-text">${escHtml(item.text)}</div>
+            ${item.sub ? `<div class="check-sub">${escHtml(item.sub)}</div>` : ''}
+          </div>
+        </div>`;
+      }
+    }
+  }
+  if (packEditMode) {
+    html += `<button class="pack-add-cat-btn" onclick="addCategory()">+ Add Category</button>`;
+  }
+  html += `<div style="height:40px;"></div>`;
+  container.innerHTML = html;
+  restoreChecklist();
+}
+
+// ── PACK EDIT MODE ────────────────────────────────────────────────
+function togglePackEdit() {
+  packEditMode = !packEditMode;
+  const btn = document.getElementById('pack-edit-btn');
+  const sub = document.getElementById('pack-subtitle');
+  if (btn) { btn.textContent = packEditMode ? 'DONE' : 'EDIT'; btn.classList.toggle('done-btn', packEditMode); }
+  if (sub) sub.textContent = packEditMode ? 'EDITING' : 'TAP TO CHECK OFF';
+  renderPackList();
+}
+
+function deleteCheckedKey(id) {
+  const state = getChecked(); delete state[id]; saveChecked(state);
+}
+
+function addItem(catId) {
+  const cat = packData.find(c => c.id === catId);
+  if (!cat) return;
+  const newId = 'item-' + Date.now();
+  cat.items.push({ id: newId, text: 'New item', sub: '' });
+  savePackData();
+  renderPackList();
+  setTimeout(() => startItemRename(catId, newId), 50);
+}
+
+function deleteItem(catId, itemId) {
+  const cat = packData.find(c => c.id === catId);
+  if (!cat) return;
+  cat.items = cat.items.filter(i => i.id !== itemId);
+  deleteCheckedKey(itemId);
+  savePackData();
+  renderPackList();
+}
+
+function addCategory() {
+  const newId = 'cat-' + Date.now();
+  packData.push({ id: newId, label: 'New Category', items: [] });
+  savePackData();
+  renderPackList();
+  setTimeout(() => startCatRename(newId), 50);
+}
+
+function deleteCategory(catId) {
+  const cat = packData.find(c => c.id === catId);
+  if (cat) cat.items.forEach(i => deleteCheckedKey(i.id));
+  packData = packData.filter(c => c.id !== catId);
+  savePackData();
+  renderPackList();
+}
+
+function startItemRename(catId, itemId) {
+  const el = document.querySelector(`.check-item[data-key="${itemId}"] .check-text`);
+  if (!el) return;
+  el.contentEditable = 'true';
+  el.focus();
+  const range = document.createRange(); range.selectNodeContents(el);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  const finish = () => { el.contentEditable = 'false'; saveItemRename(catId, itemId, el.textContent.trim()); };
+  el.onblur = finish;
+  el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+}
+
+function saveItemRename(catId, itemId, newText) {
+  const cat = packData.find(c => c.id === catId);
+  const item = cat && cat.items.find(i => i.id === itemId);
+  if (!item || !newText) { renderPackList(); return; }
+  item.text = newText;
+  savePackData();
+  renderPackList();
+}
+
+function startCatRename(catId) {
+  const el = document.querySelector(`.pack-cat-label[onclick*="${catId}"]`);
+  if (!el) return;
+  el.contentEditable = 'true';
+  el.focus();
+  const range = document.createRange(); range.selectNodeContents(el);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  el.onblur = () => { el.contentEditable = 'false'; saveCatRename(catId, el.textContent.trim()); };
+  el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+}
+
+function saveCatRename(catId, newLabel) {
+  const cat = packData.find(c => c.id === catId);
+  if (!cat || !newLabel) { renderPackList(); return; }
+  cat.label = newLabel;
+  savePackData();
+  renderPackList();
+}
+
+// ── DRAG TO REORDER ───────────────────────────────────────────────
+let dragState = null;
+
+function onDragHandleTouchStart(e, catId, itemId) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const itemEl = e.currentTarget.closest('.check-item');
+  const rect = itemEl.getBoundingClientRect();
+
+  const clone = document.createElement('div');
+  clone.className = 'drag-clone';
+  clone.style.top = rect.top + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.textContent = itemEl.querySelector('.check-text').textContent;
+  document.body.appendChild(clone);
+
+  itemEl.style.opacity = '0.3';
+
+  const cat = packData.find(c => c.id === catId);
+  dragState = {
+    catId, itemId, clone, itemEl,
+    startY: touch.clientY,
+    cloneTop: rect.top,
+    currentIndex: cat ? cat.items.findIndex(i => i.id === itemId) : 0
+  };
+
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend', onDragEnd, { once: true });
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const dy = touch.clientY - dragState.startY;
+  dragState.clone.style.top = (dragState.cloneTop + dy) + 'px';
+
+  const cat = packData.find(c => c.id === dragState.catId);
+  if (!cat) return;
+  const cloneCenterY = dragState.cloneTop + dy + dragState.clone.offsetHeight / 2;
+  const itemEls = document.querySelectorAll(`.check-item[data-cat="${dragState.catId}"]`);
+  let targetIndex = dragState.currentIndex;
+  itemEls.forEach((el, i) => {
+    const r = el.getBoundingClientRect();
+    if (cloneCenterY > r.top && cloneCenterY < r.bottom) targetIndex = i;
+  });
+
+  if (targetIndex !== dragState.currentIndex) {
+    const [moved] = cat.items.splice(dragState.currentIndex, 1);
+    cat.items.splice(targetIndex, 0, moved);
+    dragState.currentIndex = targetIndex;
+    renderPackList();
+    const newEl = document.querySelector(`.check-item[data-key="${dragState.itemId}"]`);
+    if (newEl) { newEl.style.opacity = '0.3'; dragState.itemEl = newEl; }
+  }
+}
+
+function onDragEnd() {
+  if (!dragState) return;
+  document.removeEventListener('touchmove', onDragMove);
+  if (dragState.clone) dragState.clone.remove();
+  if (dragState.itemEl) dragState.itemEl.style.opacity = '';
+  savePackData();
+  renderPackList();
+  dragState = null;
+}
+
 // ── CHECKLIST WITH PERSISTENCE ───────────────────────────────────
 function getChecked() {
   try { return JSON.parse(localStorage.getItem('london-checked') || '{}'); } catch { return {}; }
@@ -894,16 +1179,23 @@ function toggleCheck(el) {
     saveChecked(state);
   }
 }
-// Restore checklist state on load
-(function restoreChecklist() {
+// Restore checklist state (called after every renderPackList)
+function restoreChecklist() {
   const state = getChecked();
   document.querySelectorAll('.check-item[data-key]').forEach(el => {
     if (state[el.dataset.key]) {
       el.classList.add('done');
-      el.querySelector('.check-box').textContent = '✓';
+      const box = el.querySelector('.check-box');
+      if (box) box.textContent = '✓';
     }
   });
-})();
+}
+
+function initPackScreen() {
+  packData = getPackData();
+  renderPackList();
+}
+initPackScreen();
 // ── MAP ──────────────────────────────────────────────────────────
 let mapInit = false;
 let allMarkers = [];
