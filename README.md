@@ -1,1 +1,1 @@
-# claude-helm
+# claude-trip-app
