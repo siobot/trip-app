@@ -278,25 +278,8 @@
     letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; text-align: center;
   }
   .pack-add-cat-btn:active { border-color: var(--accent); color: var(--accent); }
-  /* DAY NOTES */
-  .day-notes-section {
-    margin-top: 20px; padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-  .day-notes-label {
-    font-family: var(--mono); font-size: 18px; text-transform: uppercase;
-    color: var(--muted); letter-spacing: 1px; margin-bottom: 8px;
-  }
-  .day-notes {
-    width: 100%; min-height: 80px; padding: 12px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    color: var(--text); font-family: var(--font); font-size: 22px; line-height: 1.5;
-    resize: vertical; outline: none;
-  }
-  .day-notes:focus { border-color: var(--accent); }
-  .day-notes::placeholder { color: var(--muted2); }
   /* DAY CHECKLIST */
-  .day-checklist { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .day-checklist { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
   .day-checklist-label {
     font-family: var(--mono); font-size: 18px; text-transform: uppercase;
     color: var(--muted); letter-spacing: 1px; margin-bottom: 10px;
@@ -407,6 +390,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="fri">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="item">
         <div class="item-icon">✈️</div>
         <div class="item-content">
@@ -447,18 +438,6 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.512792%2C-0.186209&endname=MSK+The+Whiteley" target="_blank">📍 Open in Citymapper</a>
         </div>
       </div>
-      <div class="day-checklist" data-day="fri">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="fri" placeholder="Notes for today…"></textarea>
-      </div>
     </div>
   </div>
   <!-- SATURDAY -->
@@ -471,6 +450,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="sat">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="reminder urgent">
         <div class="reminder-head">⚠ Time Sensitive</div>
         Fight for Sight closes 5pm — do this one first when you arrive on Portobello
@@ -589,18 +576,6 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5103%2C-0.1873&endname=Boots+Queensway" target="_blank">📍 Boots Queensway in Citymapper</a>
         </div>
       </div>
-      <div class="day-checklist" data-day="sat">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="sat" placeholder="Notes for today…"></textarea>
-      </div>
     </div>
   </div>
   <!-- SUNDAY -->
@@ -613,6 +588,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="sun">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="reminder">
         <div class="reminder-head">🕐 Clocks Spring Forward</div>
         Clocks go forward 1 hour tonight (1am → 2am). You lose an hour of sleep but gain evening daylight. All your devices update automatically — just be aware if you set a manual alarm.
@@ -633,18 +616,6 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Foodhall+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
         </div>
       </div>
-      <div class="day-checklist" data-day="sun">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="sun" placeholder="Notes for today…"></textarea>
-      </div>
     </div>
   </div>
   <!-- MONDAY -->
@@ -657,6 +628,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="mon">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="transit-block">
         <div class="transit-label">Hotel → TK Maxx Oxford Street</div>
         <div class="transit-row">
@@ -750,18 +729,6 @@
           </div>
         </div>
       </div>
-      <div class="day-checklist" data-day="mon">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="mon" placeholder="Notes for today…"></textarea>
-      </div>
     </div>
   </div>
   <!-- TUESDAY -->
@@ -774,6 +741,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="tue">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="transit-block">
         <div class="transit-label">Hotel → Waterstones Piccadilly</div>
         <div class="transit-row">
@@ -814,14 +789,6 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5095%2C-0.1367&endname=Waterstones+Piccadilly" target="_blank">📍 Open in Citymapper</a>
         </div>
       </div>
-      <div class="day-checklist" data-day="tue">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
       <div class="transit-block">
         <div class="transit-label">Return via Paddington (groceries)</div>
         <div class="transit-row">
@@ -854,10 +821,6 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
         </div>
       </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="tue" placeholder="Notes for today…"></textarea>
-      </div>
     </div>
   </div>
   <!-- WEDNESDAY -->
@@ -870,6 +833,14 @@
       <div class="day-chevron">›</div>
     </div>
     <div class="day-body">
+      <div class="day-checklist" data-day="wed">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="reminder">
         <div class="reminder-head">🕐 Reminder: BST is active</div>
         Clocks changed Sunday night. UK is now GMT+1 (BST). All times below are local BST.
@@ -911,18 +882,6 @@
           <div class="item-name">LHR → LIS · TP 1359</div>
           <div class="item-detail">DEPARTS 13:45 BST · ARRIVES 16:35 · TERMINAL 2<br>CONFIRMATION XH7EVN</div>
         </div>
-      </div>
-      <div class="day-checklist" data-day="wed">
-        <div class="day-checklist-label">✅ Checklist</div>
-        <div class="day-checklist-items"></div>
-        <div class="shop-add-row">
-          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
-          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
-        </div>
-      </div>
-      <div class="day-notes-section">
-        <div class="day-notes-label">📝 Notes</div>
-        <textarea class="day-notes" data-day="wed" placeholder="Notes for today…"></textarea>
       </div>
     </div>
   </div>
@@ -1314,19 +1273,6 @@ function initPackScreen() {
   renderPackList();
 }
 initPackScreen();
-// ── DAY NOTES ───────────────────────────────────────────────────
-(function initDayNotes() {
-  const notes = JSON.parse(localStorage.getItem('london-day-notes') || '{}');
-  document.querySelectorAll('.day-notes').forEach(ta => {
-    const day = ta.dataset.day;
-    if (notes[day]) ta.value = notes[day];
-    ta.addEventListener('input', () => {
-      const all = JSON.parse(localStorage.getItem('london-day-notes') || '{}');
-      all[day] = ta.value;
-      localStorage.setItem('london-day-notes', JSON.stringify(all));
-    });
-  });
-})();
 // ── DAY CHECKLISTS ──────────────────────────────────────────────
 function getDayChecklist(day) {
   try { return JSON.parse(localStorage.getItem('london-checklist-' + day) || '[]'); } catch { return []; }
