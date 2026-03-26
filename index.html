@@ -278,6 +278,52 @@
     letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; text-align: center;
   }
   .pack-add-cat-btn:active { border-color: var(--accent); color: var(--accent); }
+  /* DAY NOTES */
+  .day-notes-section {
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .day-notes-label {
+    font-family: var(--mono); font-size: 18px; text-transform: uppercase;
+    color: var(--muted); letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .day-notes {
+    width: 100%; min-height: 80px; padding: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: var(--font); font-size: 22px; line-height: 1.5;
+    resize: vertical; outline: none;
+  }
+  .day-notes:focus { border-color: var(--accent); }
+  .day-notes::placeholder { color: var(--muted2); }
+  /* DAY CHECKLIST */
+  .day-checklist { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .day-checklist-label {
+    font-family: var(--mono); font-size: 18px; text-transform: uppercase;
+    color: var(--muted); letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .shop-entry-remove {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: none; border: 1px solid var(--border);
+    color: var(--muted2); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .shop-entry-remove:active { opacity: 0.5; }
+  .shop-add-row { display: flex; gap: 8px; margin-top: 10px; }
+  .shop-add-input {
+    flex: 1; padding: 10px 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: var(--font); font-size: 22px;
+    outline: none;
+  }
+  .shop-add-input:focus { border-color: var(--accent); }
+  .shop-add-input::placeholder { color: var(--muted2); }
+  .shop-add-btn {
+    padding: 10px 16px;
+    background: var(--accent); border: none; border-radius: 10px;
+    color: #0c0d0c; font-family: var(--mono); font-size: 18px;
+    font-weight: 600; letter-spacing: 0.05em; cursor: pointer;
+  }
+  .shop-add-btn:active { opacity: 0.7; }
   /* MAP SCREEN */
   #map-screen { padding-top: calc(env(safe-area-inset-top) + 48px); }
   #map { height: calc(100vh - env(safe-area-inset-top) - 48px - 44px); width: 100%; }
@@ -400,6 +446,18 @@
           <div class="item-note">Late arrival — ring ahead if concerned. Settle in. No plans tonight.</div>
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.512792%2C-0.186209&endname=MSK+The+Whiteley" target="_blank">📍 Open in Citymapper</a>
         </div>
+      </div>
+      <div class="day-checklist" data-day="fri">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="fri" placeholder="Notes for today…"></textarea>
       </div>
     </div>
   </div>
@@ -531,6 +589,18 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5103%2C-0.1873&endname=Boots+Queensway" target="_blank">📍 Boots Queensway in Citymapper</a>
         </div>
       </div>
+      <div class="day-checklist" data-day="sat">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="sat" placeholder="Notes for today…"></textarea>
+      </div>
     </div>
   </div>
   <!-- SUNDAY -->
@@ -562,6 +632,18 @@
           <div class="item-note">M&S Foodhall is in Paddington station. Sainsbury's is a few minutes further.</div>
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Foodhall+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
         </div>
+      </div>
+      <div class="day-checklist" data-day="sun">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="sun" placeholder="Notes for today…"></textarea>
       </div>
     </div>
   </div>
@@ -668,6 +750,18 @@
           </div>
         </div>
       </div>
+      <div class="day-checklist" data-day="mon">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="mon" placeholder="Notes for today…"></textarea>
+      </div>
     </div>
   </div>
   <!-- TUESDAY -->
@@ -720,6 +814,14 @@
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5095%2C-0.1367&endname=Waterstones+Piccadilly" target="_blank">📍 Open in Citymapper</a>
         </div>
       </div>
+      <div class="day-checklist" data-day="tue">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
       <div class="transit-block">
         <div class="transit-label">Return via Paddington (groceries)</div>
         <div class="transit-row">
@@ -751,6 +853,10 @@
           <div class="item-detail">SAINSBURY'S OR M&S · PADDINGTON</div>
           <a class="map-link" href="https://citymapper.com/directions?endcoord=51.5154%2C-0.1755&endname=M%26S+Paddington" target="_blank">📍 M&S Paddington in Citymapper</a>
         </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="tue" placeholder="Notes for today…"></textarea>
       </div>
     </div>
   </div>
@@ -805,6 +911,18 @@
           <div class="item-name">LHR → LIS · TP 1359</div>
           <div class="item-detail">DEPARTS 13:45 BST · ARRIVES 16:35 · TERMINAL 2<br>CONFIRMATION XH7EVN</div>
         </div>
+      </div>
+      <div class="day-checklist" data-day="wed">
+        <div class="day-checklist-label">✅ Checklist</div>
+        <div class="day-checklist-items"></div>
+        <div class="shop-add-row">
+          <input class="shop-add-input day-checklist-input" type="text" placeholder="Add an item…" enterkeyhint="done">
+          <button class="shop-add-btn" onclick="addDayItem(this)">Add</button>
+        </div>
+      </div>
+      <div class="day-notes-section">
+        <div class="day-notes-label">📝 Notes</div>
+        <textarea class="day-notes" data-day="wed" placeholder="Notes for today…"></textarea>
       </div>
     </div>
   </div>
@@ -1196,6 +1314,72 @@ function initPackScreen() {
   renderPackList();
 }
 initPackScreen();
+// ── DAY NOTES ───────────────────────────────────────────────────
+(function initDayNotes() {
+  const notes = JSON.parse(localStorage.getItem('london-day-notes') || '{}');
+  document.querySelectorAll('.day-notes').forEach(ta => {
+    const day = ta.dataset.day;
+    if (notes[day]) ta.value = notes[day];
+    ta.addEventListener('input', () => {
+      const all = JSON.parse(localStorage.getItem('london-day-notes') || '{}');
+      all[day] = ta.value;
+      localStorage.setItem('london-day-notes', JSON.stringify(all));
+    });
+  });
+})();
+// ── DAY CHECKLISTS ──────────────────────────────────────────────
+function getDayChecklist(day) {
+  try { return JSON.parse(localStorage.getItem('london-checklist-' + day) || '[]'); } catch { return []; }
+}
+function saveDayChecklist(day, list) {
+  localStorage.setItem('london-checklist-' + day, JSON.stringify(list));
+}
+function renderDayChecklist(section) {
+  const day = section.dataset.day;
+  const container = section.querySelector('.day-checklist-items');
+  const items = getDayChecklist(day);
+  container.innerHTML = '';
+  items.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'check-item' + (item.done ? ' done' : '');
+    row.onclick = function() {
+      const list = getDayChecklist(day);
+      list[i].done = !list[i].done;
+      saveDayChecklist(day, list);
+      renderDayChecklist(section);
+    };
+    row.innerHTML = '<div class="check-box">' + (item.done ? '✓' : '') + '</div>' +
+      '<div style="flex:1"><div class="check-text">' + item.name.replace(/</g, '&lt;') + '</div></div>' +
+      '<button class="shop-entry-remove" onclick="event.stopPropagation();removeDayItem(\'' + day + '\',' + i + ')">×</button>';
+    container.appendChild(row);
+  });
+}
+function addDayItem(btn) {
+  const section = btn.closest('.day-checklist');
+  const day = section.dataset.day;
+  const input = section.querySelector('.day-checklist-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const items = getDayChecklist(day);
+  items.push({ name: name, done: false });
+  saveDayChecklist(day, items);
+  input.value = '';
+  renderDayChecklist(section);
+}
+function removeDayItem(day, index) {
+  const items = getDayChecklist(day);
+  items.splice(index, 1);
+  saveDayChecklist(day, items);
+  document.querySelector('.day-checklist[data-day="' + day + '"]').dispatchEvent(new Event('render'));
+  renderDayChecklist(document.querySelector('.day-checklist[data-day="' + day + '"]'));
+}
+// Init all day checklists
+document.querySelectorAll('.day-checklist').forEach(section => {
+  renderDayChecklist(section);
+  section.querySelector('.day-checklist-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addDayItem(section.querySelector('.shop-add-btn')); }
+  });
+});
 // ── MAP ──────────────────────────────────────────────────────────
 let mapInit = false;
 let allMarkers = [];
