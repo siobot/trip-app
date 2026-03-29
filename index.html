@@ -137,7 +137,15 @@
   .transit-label {
     font-family: var(--mono); font-size: 16px; letter-spacing: 0.12em;
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
   }
+  .transit-label::after {
+    content: '›'; font-size: 20px; color: var(--muted2);
+    transition: transform 0.2s; transform: rotate(90deg);
+  }
+  .transit-block.collapsed .transit-label { margin-bottom: 0; }
+  .transit-block.collapsed .transit-label::after { transform: rotate(0deg); }
+  .transit-block.collapsed .transit-row { display: none; }
   .transit-row {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 5px 0;
@@ -1141,7 +1149,7 @@ function startItemRename(catId, itemId) {
   const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
   const finish = () => { el.contentEditable = 'false'; saveItemRename(catId, itemId, el.textContent.trim()); };
   el.onblur = finish;
-  el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+  el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); addItem(catId); } };
 }
 
 function saveItemRename(catId, itemId, newText) {
@@ -1324,6 +1332,12 @@ document.querySelectorAll('.day-checklist').forEach(section => {
   renderDayChecklist(section);
   section.querySelector('.day-checklist-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); addDayItem(section.querySelector('.shop-add-btn')); }
+  });
+});
+// ── COLLAPSIBLE TRANSIT ─────────────────────────────────────────
+document.querySelectorAll('.transit-label').forEach(label => {
+  label.addEventListener('click', () => {
+    label.closest('.transit-block').classList.toggle('collapsed');
   });
 });
 // ── MAP ──────────────────────────────────────────────────────────
